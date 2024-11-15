@@ -1,22 +1,29 @@
 fn main() {
-    println!("LadyGrey VM");
-    let mut larsa = Machine {
+    let mut calc = Machine {
         stack: Vec::new(),
         heap: vec![Type::Null; RAM_SPEC].try_into().unwrap(),
-        code: vec![
-            Instruction::Store(Type::Integer(1)),
-            Instruction::Store(Type::Integer(2)),
-            Instruction::Mul,
-            Instruction::Push(2),
-            Instruction::Ar,
-            Instruction::Push(1),
-            Instruction::Store(Type::Bool(true)),
-            Instruction::Jump,
-        ],
+        code: calc_compiler("5 + 4".to_string()),
         ar: 0,
         pc: 0,
     };
-    larsa.run();
+    calc.run();
+    let result = calc.heap[0].clone();
+    dbg!(result);
+}
+
+fn calc_compiler(source: String) -> Vec<Instruction> {
+    let tokens: Vec<&str> = source.split_whitespace().collect();
+    vec![
+        Instruction::Store(Type::Integer(tokens[0].parse().unwrap())),
+        Instruction::Store(Type::Integer(tokens[2].parse().unwrap())),
+        match tokens[1] {
+            "+" => Instruction::Add,
+            "-" => Instruction::Sub,
+            "*" => Instruction::Mul,
+            "/" => Instruction::Div,
+            _ => panic!("Invalid operator"),
+        }
+    ]
 }
 
 /// Spec of heap area in RAM
@@ -36,6 +43,7 @@ struct Machine {
 
 impl Machine {
     fn run(&mut self) {
+        eprintln!("LadyGrey VM is starting up...");
         while self.code.len() > self.pc {
             let instruction = self.code[self.pc].clone();
             match instruction {
