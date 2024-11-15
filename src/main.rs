@@ -2,7 +2,7 @@ fn main() {
     let mut calc = Machine {
         stack: Vec::new(),
         heap: vec![Type::Null; RAM_SPEC].try_into().unwrap(),
-        code: calc_compiler("5 * 8".to_string()),
+        code: calc_compiler("1 + 2 * 4 / 3 - 5".to_string()),
         ar: 0,
         pc: 0,
     };
@@ -13,17 +13,32 @@ fn main() {
 
 fn calc_compiler(source: String) -> Vec<Instruction> {
     let tokens: Vec<&str> = source.split_whitespace().collect();
-    vec![
-        Instruction::Store(Type::Integer(tokens[0].parse().unwrap())),
-        Instruction::Store(Type::Integer(tokens[2].parse().unwrap())),
-        match tokens[1] {
-            "+" => Instruction::Add,
-            "-" => Instruction::Sub,
-            "*" => Instruction::Mul,
-            "/" => Instruction::Div,
-            _ => panic!("Invalid operator"),
-        },
-    ]
+
+    let mut index = 0;
+    let mut code = vec![];
+
+    while tokens.len() > index {
+        match tokens[index] {
+            "+" | "-" | "*" | "/" => {
+                let value = tokens[index + 1].parse().unwrap();
+                code.push(Instruction::Store(Type::Integer(value)));
+                code.push(match tokens[index] {
+                    "+" => Instruction::Add,
+                    "-" => Instruction::Sub,
+                    "*" => Instruction::Mul,
+                    "/" => Instruction::Div,
+                    _ => panic!("Invalid operator"),
+                });
+                index += 2;
+            }
+            _ => {
+                let value = tokens[index].parse().unwrap();
+                code.push(Instruction::Store(Type::Integer(value)));
+                index += 1;
+            }
+        }
+    }
+    code
 }
 
 /// Spec of heap area in RAM
@@ -136,7 +151,7 @@ impl Machine {
                     if let Type::Integer(a) = self.heap[address].clone() {
                         let base = self.pop();
                         if let Type::Integer(b) = self.heap[base].clone() {
-                            self.heap[base] = Type::Integer(a + b);
+                            self.heap[base] = Type::Integer(b + a);
                             self.stack.push(base);
                         }
                     }
@@ -146,7 +161,7 @@ impl Machine {
                     if let Type::Integer(a) = self.heap[address].clone() {
                         let base = self.pop();
                         if let Type::Integer(b) = self.heap[base].clone() {
-                            self.heap[base] = Type::Integer(a - b);
+                            self.heap[base] = Type::Integer(b - a);
                             self.stack.push(base);
                         }
                     }
@@ -156,7 +171,7 @@ impl Machine {
                     if let Type::Integer(a) = self.heap[address].clone() {
                         let base = self.pop();
                         if let Type::Integer(b) = self.heap[base].clone() {
-                            self.heap[base] = Type::Integer(a * b);
+                            self.heap[base] = Type::Integer(b * a);
                             self.stack.push(base);
                         }
                     }
@@ -166,7 +181,7 @@ impl Machine {
                     if let Type::Integer(a) = self.heap[address].clone() {
                         let base = self.pop();
                         if let Type::Integer(b) = self.heap[base].clone() {
-                            self.heap[base] = Type::Integer(a / b);
+                            self.heap[base] = Type::Integer(b / a);
                             self.stack.push(base);
                         }
                     }
@@ -174,7 +189,7 @@ impl Machine {
             }
 
             self.pc += 1;
-            // dbg!(&self);
+            dbg!(&self);
         }
     }
     fn pop(&mut self) -> usize {
