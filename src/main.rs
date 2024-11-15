@@ -1,5 +1,5 @@
 fn main() {
-    println!("LadyGray VM");
+    println!("LadyGrey VM");
     let mut larsa = Machine {
         stack: Vec::new(),
         heap: vec![Type::Null; RAM_SPEC].try_into().unwrap(),
