@@ -42,7 +42,7 @@ fn calc_compiler(source: String) -> Vec<Instruction> {
 }
 
 /// Spec of heap area in RAM
-const RAM_SPEC: usize = 5;
+const RAM_SPEC: usize = 8;
 
 #[derive(Debug, Clone)]
 struct Machine {
@@ -189,8 +189,8 @@ impl Machine {
             }
 
             self.pc += 1;
-            dbg!(&self);
         }
+        dbg!(self);
     }
     fn pop(&mut self) -> usize {
         self.stack.pop().expect("Stack underflow")
