@@ -2,7 +2,7 @@ fn main() {
     let mut calc = Machine {
         stack: Vec::new(),
         heap: vec![Type::Null; RAM_SPEC].try_into().unwrap(),
-        code: calc_compiler("1 + 2 * 4 / 3 - 5".to_string()),
+        code: calc_compiler("1 + 2 + 3 + 4".to_string()),
         ar: 0,
         pc: 0,
     };
@@ -22,6 +22,8 @@ fn calc_compiler(source: String) -> Vec<Instruction> {
             "+" | "-" | "*" | "/" => {
                 let value = tokens[index + 1].parse().unwrap();
                 code.push(Instruction::Store(Type::Integer(value)));
+                code.push(Instruction::Push(1));
+                code.push(Instruction::Ar);
                 code.push(match tokens[index] {
                     "+" => Instruction::Add,
                     "-" => Instruction::Sub,
