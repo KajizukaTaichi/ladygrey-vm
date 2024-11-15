@@ -2,7 +2,7 @@ fn main() {
     let mut calc = Machine {
         stack: Vec::new(),
         heap: vec![Type::Null; RAM_SPEC].try_into().unwrap(),
-        code: calc_compiler("5 + 4".to_string()),
+        code: calc_compiler("5 * 8".to_string()),
         ar: 0,
         pc: 0,
     };
