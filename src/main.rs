@@ -63,6 +63,68 @@ struct Machine {
     ar: usize,
 }
 
+
+/// Data type system
+#[derive(Debug, Clone)]
+enum Type {
+    Integer(i64),
+    Bool(bool),
+    Null,
+}
+
+/// ISA (Instruction Set Architecture)
+#[allow(warnings)]
+#[derive(Debug, Clone)]
+enum Instruction {    
+    /// Copy value from heap to other area allocated by AR
+    Copy,
+    
+    /// Move value from heap to other area allocated by AR
+    Move,
+
+    /// Store value on heap and push that address
+    Store(Type),
+
+    /// Set value of AR　(Address Register)
+    Ar,
+    
+    /// Jump to the address if condition is true
+    Jump,
+
+    /// Push value to the stack
+    Push(usize),
+    
+    /// Duplicate top value on the stack
+    Dup,
+    
+    /// Swap top two values on the stack
+    Swap,
+    
+    /// Compare two value and push result to stack
+    Equal,
+
+    /// Invert boolean value
+    Not,
+
+    /// Increment integer value
+    Inc,
+
+    /// Decrement integer value
+    Dec,
+
+    /// Addition two number
+    Add,
+    
+    /// Subtraction two number
+    Sub,
+    
+    /// Multiplication two number
+    Mul,
+    
+    /// Division two number
+    Div,
+}
+
 impl Machine {
     /// Start running program
     fn start(&mut self) {
@@ -211,65 +273,4 @@ impl Machine {
     fn pop(&mut self) -> usize {
         self.stack.pop().expect("Stack underflow")
     }
-}
-
-/// Data type system
-#[derive(Debug, Clone)]
-enum Type {
-    Integer(i64),
-    Bool(bool),
-    Null,
-}
-
-/// ISA of the LadyGrey VM
-#[allow(warnings)]
-#[derive(Debug, Clone)]
-enum Instruction {    
-    /// Copy value from heap to other area allocated by AR
-    Copy,
-    
-    /// Move value from heap to other area allocated by AR
-    Move,
-
-    /// Store value on heap and push that address
-    Store(Type),
-
-    /// Set value of AR　(Address Register)
-    Ar,
-    
-    /// Jump to the address if condition is true
-    Jump,
-
-    /// Push value to the stack
-    Push(usize),
-    
-    /// Duplicate top value on the stack
-    Dup,
-    
-    /// Swap top two values on the stack
-    Swap,
-    
-    /// Compare two value and push result to stack
-    Equal,
-
-    /// Invert boolean value
-    Not,
-
-    /// Increment integer value
-    Inc,
-
-    /// Decrement integer value
-    Dec,
-
-    /// Addition two number
-    Add,
-    
-    /// Subtraction two number
-    Sub,
-    
-    /// Multiplication two number
-    Mul,
-    
-    /// Division two number
-    Div,
 }
