@@ -45,7 +45,7 @@ fn calc_compiler(source: String) -> Vec<Instruction> {
 }
 
 /// Spec of heap area in RAM
-const RAM_SPEC: usize = 8;
+const RAM_SPEC: usize = 2;
 
 /// Core machine body of LadyGrey VM
 #[derive(Debug, Clone)]
