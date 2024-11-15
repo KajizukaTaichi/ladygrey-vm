@@ -22,7 +22,7 @@ fn calc_compiler(source: String) -> Vec<Instruction> {
             "*" => Instruction::Mul,
             "/" => Instruction::Div,
             _ => panic!("Invalid operator"),
-        }
+        },
     ]
 }
 
@@ -53,10 +53,6 @@ impl Machine {
                     self.stack.push(self.ar);
                     self.ar += 1;
                 }
-                Instruction::Ar => {
-                    let ar = self.pop();
-                    self.ar = ar;
-                }
                 Instruction::Move => {
                     let address = self.pop();
                     self.heap[self.ar] = self.heap[address].clone();
@@ -64,6 +60,16 @@ impl Machine {
                     self.stack.push(self.ar);
                     self.ar += 1;
                 }
+                Instruction::Store(value) => {
+                    self.heap[self.ar] = value;
+                    self.stack.push(self.ar);
+                    self.ar += 1;
+                }
+                Instruction::Ar => {
+                    let ar = self.pop();
+                    self.ar = ar;
+                }
+
                 Instruction::Dup => {
                     let value = self.pop();
                     self.stack.push(value);
@@ -75,28 +81,10 @@ impl Machine {
                     self.stack.push(a);
                     self.stack.push(b);
                 }
-                Instruction::Store(value) => {
-                    self.heap[self.ar] = value;
-                    self.stack.push(self.ar);
-                    self.ar += 1;
-                }
                 Instruction::Push(value) => {
                     self.stack.push(value);
                 }
-                Instruction::Inc => {
-                    let address = self.pop();
-                    if let Type::Integer(i) = self.heap[address] {
-                        self.heap[address] = Type::Integer(i + 1);
-                    }
-                    self.stack.push(address);
-                }
-                Instruction::Dec => {
-                    let address = self.pop();
-                    if let Type::Integer(i) = self.heap[address] {
-                        self.heap[address] = Type::Integer(i - 1);
-                    }
-                    self.stack.push(address);
-                }
+
                 Instruction::Jump => {
                     let address = self.pop();
                     let condition = if let Type::Bool(b) = self.heap[address].clone() {
@@ -110,6 +98,7 @@ impl Machine {
                         continue;
                     }
                 }
+
                 Instruction::Equal => {
                     let address = self.pop();
                     if let Type::Integer(a) = self.heap[address].clone() {
@@ -124,6 +113,21 @@ impl Machine {
                     let address = self.pop();
                     if let Type::Bool(b) = self.heap[address] {
                         self.heap[address] = Type::Bool(!b);
+                    }
+                    self.stack.push(address);
+                }
+
+                Instruction::Inc => {
+                    let address = self.pop();
+                    if let Type::Integer(i) = self.heap[address] {
+                        self.heap[address] = Type::Integer(i + 1);
+                    }
+                    self.stack.push(address);
+                }
+                Instruction::Dec => {
+                    let address = self.pop();
+                    if let Type::Integer(i) = self.heap[address] {
+                        self.heap[address] = Type::Integer(i - 1);
                     }
                     self.stack.push(address);
                 }
@@ -168,8 +172,9 @@ impl Machine {
                     }
                 }
             }
-            dbg!(&self);
+
             self.pc += 1;
+            // dbg!(&self);
         }
     }
     fn pop(&mut self) -> usize {
