@@ -6,11 +6,12 @@ fn main() {
         ar: 0,
         pc: 0,
     };
-    calc.run();
+    calc.start();
     let result = calc.heap[0].clone();
     dbg!(result);
 }
 
+/// Compiler of simple calculation expression
 fn calc_compiler(source: String) -> Vec<Instruction> {
     let tokens: Vec<&str> = source.split_whitespace().collect();
 
@@ -46,10 +47,14 @@ fn calc_compiler(source: String) -> Vec<Instruction> {
 /// Spec of heap area in RAM
 const RAM_SPEC: usize = 8;
 
+/// Core machine body of LadyGrey VM
 #[derive(Debug, Clone)]
 struct Machine {
+    /// Area that have address
     stack: Vec<usize>,
+    /// Area that objects are stored
     heap: [Type; RAM_SPEC],
+    /// Program code to be executed
     code: Vec<Instruction>,
 
     /// Program Counter
@@ -59,11 +64,13 @@ struct Machine {
 }
 
 impl Machine {
-    fn run(&mut self) {
+    /// Start running program
+    fn start(&mut self) {
         eprintln!("LadyGrey VM is starting up...");
         while self.code.len() > self.pc {
             let instruction = self.code[self.pc].clone();
             match instruction {
+                // About memory and register
                 Instruction::Copy => {
                     let address = self.pop();
                     self.heap[self.ar] = self.heap[address].clone();
@@ -86,7 +93,21 @@ impl Machine {
                     let ar = self.pop();
                     self.ar = ar;
                 }
+                Instruction::Jump => {
+                    let address = self.pop();
+                    let condition = if let Type::Bool(b) = self.heap[address].clone() {
+                        b
+                    } else {
+                        false
+                    };
+                    let jump_to = self.pop();
+                    if condition {
+                        self.pc = jump_to;
+                        continue;
+                    }
+                }
 
+                // About stack
                 Instruction::Dup => {
                     let value = self.pop();
                     self.stack.push(value);
@@ -102,20 +123,7 @@ impl Machine {
                     self.stack.push(value);
                 }
 
-                Instruction::Jump => {
-                    let address = self.pop();
-                    let condition = if let Type::Bool(b) = self.heap[address].clone() {
-                        b
-                    } else {
-                        false
-                    };
-                    let jump_to = self.pop();
-                    if condition {
-                        self.pc = jump_to;
-                        continue;
-                    }
-                }
-
+                // About logical processing
                 Instruction::Equal => {
                     let address = self.pop();
                     if let Type::Integer(a) = self.heap[address].clone() {
@@ -134,6 +142,7 @@ impl Machine {
                     self.stack.push(address);
                 }
 
+                // About arithmetic processing
                 Instruction::Inc => {
                     let address = self.pop();
                     if let Type::Integer(i) = self.heap[address] {
@@ -190,15 +199,21 @@ impl Machine {
                 }
             }
 
+            // Move to next instruction
             self.pc += 1;
         }
+
+        // Show dump
         dbg!(self);
     }
+
+    /// Pop the stack's top value
     fn pop(&mut self) -> usize {
         self.stack.pop().expect("Stack underflow")
     }
 }
 
+/// Data type system
 #[derive(Debug, Clone)]
 enum Type {
     Integer(i64),
@@ -206,23 +221,55 @@ enum Type {
     Null,
 }
 
+/// ISA of the LadyGrey VM
 #[allow(warnings)]
 #[derive(Debug, Clone)]
-enum Instruction {
-    Push(usize),
-    Dup,
-    Swap,
-    Store(Type),
+enum Instruction {    
+    /// Copy value from heap to other area allocated by AR
     Copy,
+    
+    /// Move value from heap to other area allocated by AR
     Move,
-    Inc,
-    Dec,
-    Add,
-    Sub,
-    Mul,
-    Div,
+
+    /// Store value on heap and push that address
+    Store(Type),
+
+    /// Set value of AR　(Address Register)
     Ar,
+    
+    /// Jump to the address if condition is true
     Jump,
+
+    /// Push value to the stack
+    Push(usize),
+    
+    /// Duplicate top value on the stack
+    Dup,
+    
+    /// Swap top two values on the stack
+    Swap,
+    
+    /// Compare two value and push result to stack
     Equal,
+
+    /// Invert boolean value
     Not,
+
+    /// Increment integer value
+    Inc,
+
+    /// Decrement integer value
+    Dec,
+
+    /// Addition two number
+    Add,
+    
+    /// Subtraction two number
+    Sub,
+    
+    /// Multiplication two number
+    Mul,
+    
+    /// Division two number
+    Div,
 }
