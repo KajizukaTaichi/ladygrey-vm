@@ -41,6 +41,7 @@ fn calc_compiler(source: String) -> Vec<Instruction> {
             }
         }
     }
+    println!("expression `{source}` is  successfully compiled.");
     code
 }
 
@@ -82,6 +83,9 @@ enum Instruction {
     /// Move value from heap to other area allocated by AR
     Move,
 
+    /// Load value on stack from heap
+    Load,
+
     /// Store value on heap and push that address
     Store(Type),
 
@@ -91,13 +95,13 @@ enum Instruction {
     /// Jump to the address if condition is true
     Jump,
 
-    /// Push value to the stack
+    /// Push value to stack
     Push(usize),
     
-    /// Duplicate top value on the stack
+    /// Duplicate top value on stack
     Dup,
     
-    /// Swap top two values on the stack
+    /// Swap top two values on stack
     Swap,
     
     /// Compare two value and push result to stack
@@ -145,6 +149,12 @@ impl Machine {
                     self.heap[address] = Type::Null;
                     self.stack.push(self.ar);
                     self.ar += 1;
+                }
+                Instruction::Load => {
+                    let address = self.pop();
+                    if let Type::Integer(i) = self.heap[address] {
+                        self.stack.push(i.try_into().unwrap());
+                    }
                 }
                 Instruction::Store(value) => {
                     self.heap[self.ar] = value;
@@ -269,7 +279,7 @@ impl Machine {
         dbg!(self);
     }
 
-    /// Pop the stack's top value
+    /// Pop stack's top value
     fn pop(&mut self) -> usize {
         self.stack.pop().expect("Stack underflow")
     }
