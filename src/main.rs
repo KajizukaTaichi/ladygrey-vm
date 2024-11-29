@@ -2,7 +2,7 @@ fn main() {
     let mut calc = Machine {
         stack: Vec::new(),
         heap: vec![Type::Null; RAM_SPEC].try_into().unwrap(),
-        code: calc_compiler("1 + 2 + 3 + 4".to_string()),
+        code: calc_compiler("1 + 2 + 3 * 4".to_string()),
         ar: 0,
         pc: 0,
     };
@@ -30,7 +30,7 @@ fn calc_compiler(source: String) -> Vec<Instruction> {
                     "-" => Instruction::Sub,
                     "*" => Instruction::Mul,
                     "/" => Instruction::Div,
-                    _ => panic!("Invalid operator"),
+                    _ => todo!(),
                 });
                 index += 2;
             }
